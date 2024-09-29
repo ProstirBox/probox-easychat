@@ -316,7 +316,6 @@ if SERVER then
 				-- we dont want to set the SHA if we have an outdated version
 				if commit_time > cur_edit_time then
 					is_outdated = true
-					EasyChat.Print("Running unknown outdated version")
 				else
 					is_new_version = true
 					cookie.Set("ECLatestSHA", commit.sha)
@@ -331,7 +330,6 @@ if SERVER then
 					-- same file as old but different sha, new update but not installed ?
 					is_outdated = true
 					old_version, new_version = latest_sha, commit.sha
-					EasyChat.Print("Running outdated version ", latest_sha)
 				else
 					-- only update version if the last file edit was AFTER the latest commit
 					if commit_time ~= -1 and cur_edit_time >= commit_time then
@@ -344,7 +342,6 @@ if SERVER then
 			-- in theory this should never happen but what do I know
 			elseif commit_time > cur_edit_time then
 				is_outdated = true
-				EasyChat.Print("Running unknown outdated version")
 			else
 				EasyChat.Print("Running version ", latest_sha)
 			end
@@ -412,17 +409,7 @@ if SERVER then
 		if not ply:IsAdmin() then return end
 		if ply.ECHasVersionWarned then return end
 
-		if is_outdated and EC_VERSION_WARNING:GetBool() then
-			local msg_components = { COLOR_GRAY, "The server is running an", COLOR_RED, " outdated ", COLOR_GRAY, "version of", COLOR_RED, " EasyChat" }
-			if old_version and new_version then
-				table.Add(msg_components, { COLOR_GRAY, " (current: ", COLOR_RED, old_version, COLOR_GRAY, " | newest: ", COLOR_RED, new_version, COLOR_GRAY, ")." })
-			else
-				table.Add(msg_components, { COLOR_GRAY, "." })
-			end
-
-			table.insert(msg_components, "\nConsider updating.")
-			EasyChat.PlayerAddText(ply, unpack(msg_components))
-		elseif is_new_version then
+		if is_new_version then
 			ply:SendLua([[cookie.Delete("ECChromiumWarn")]])
 		end
 
