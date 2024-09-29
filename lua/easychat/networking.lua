@@ -409,27 +409,7 @@ if CLIENT then
 			EC_TRANSLATE_INC_SRC_LANG:GetString(),
 			EC_TRANSLATE_INC_TARGET_LANG:GetString()
 
-		if EC_TRANSLATE_INC_MSG:GetBool() and source_lang ~= target_lang and ply ~= LocalPlayer() then
-			EasyChat.Translator:Translate(msg, source_lang, target_lang, function(success, _, translation)
-				local datapack = { msg }
-				if EasyChat.SafeHookRun("OnPlayerChatTransform", ply, datapack, is_team, is_local) == false then return end
-
-				msg = datapack[1]
-				if not msg then return end
-
-				-- dont use the gamemode default function here as it always returns true
-				local suppress = hook.Call("OnPlayerChat", nil, ply, msg, is_team, is_dead, is_local)
-				if not suppress then
-					-- call the gamemode function if we're not suppressed otherwise it wont display
-					GAMEMODE:OnPlayerChat(ply, msg, is_team, is_dead, is_local)
-					if translation and msg ~= translation then
-						chat.AddText(ply, ("▲ %s ▲"):format(translation))
-					end
-				end
-			end)
-		else
-			hook.Run("OnPlayerChat", ply, msg, is_team, is_dead, is_local)
-		end
+		hook.Run("OnPlayerChat", ply, msg, is_team, is_dead, is_local)
 	end
 
 	local MAX_RETRIES = 40
@@ -523,21 +503,11 @@ if CLIENT then
 			EC_TRANSLATE_OUT_SRC_LANG:GetString(),
 			EC_TRANSLATE_OUT_TARGET_LANG:GetString()
 
-		if not no_translate and EC_TRANSLATE_OUT_MSG:GetBool() and source_lang ~= target_lang then
-			EasyChat.Translator:Translate(msg, source_lang, target_lang, function(success, _, translation)
-				net.Start(NET_SEND_MSG)
-				net.WriteString(success and translation or msg)
-				net.WriteBool(is_team)
-				net.WriteBool(is_local)
-				net.SendToServer()
-			end)
-		else
-			net.Start(NET_SEND_MSG)
-			net.WriteString(msg)
-			net.WriteBool(is_team)
-			net.WriteBool(is_local)
-			net.SendToServer()
-		end
+		net.Start(NET_SEND_MSG)
+		net.WriteString(msg)
+		net.WriteBool(is_team)
+		net.WriteBool(is_local)
+		net.SendToServer()
 	end
 
 	function EasyChat.LoadBlockedPlayers()
